@@ -15,16 +15,23 @@ class PiNode:
 		self.parent = parent
 		self.children = children
 		self.cumCap = None
-		self.n3 = RCNode(0, resistance/3, n2, self.children)
-		self.n2 = RCNode(capacitance/2, resistance/3, n1, n3)
-		self.n1 = RCNode(capacitance/2, resistance/3, self.parent, n1)
+		self.n1 = RCNode(capacitance/2, resistance/3, self.parent, [])
+		self.n2 = RCNode(capacitance/2, resistance/3, self.n1, [])
+		self.n3 = RCNode(0, resistance/3, self.n2, self.children)
+		self.n1.addChild(self.n2)
+		self.n2.addChild(self.n3)
+		
+		
+
+	def addChild(self, child):
+		self.n3.addChild(child)
 
 	def calcpTau(self):
-		self.n1.calcptau()
+		self.n1.calcpTau()
 		self.cumCap = self.n1.cumCap
 
 	def calcTau(self):
-		return n3.calcTau()
+		return self.n3.calcTau()
 		
 
 class RCNode:
@@ -47,25 +54,28 @@ class RCNode:
 		self.parent = parent
 		self.children = children
 		self.ptau = None
-		elif (self.children == None):
+		if (self.children == None):
 			self.cumCap = capacitance	
 		else:
 			self.cumCap = None
 			
+	def addChild(self, child):
+		self.children.append(child)
+
 	def calcpTau(self):
-		self.cumCap = capacitance
+		self.cumCap = self.capacitance
 		for child in self.children:
 			if (child.cumCap == None):
-				child.calcptau()
+				child.calcpTau()
 			self.cumCap += child.cumCap
-		self.ptau = resistance*self.cumCap
+		self.ptau = self.resistance*self.cumCap
 
 	def calcTau(self):
 		if (self.ptau == None):
 			self.calcpTau()
 		cumTau = self.ptau
-		if (parent != None):
-			cumTau += parent.calcTau()
+		if (self.parent != None):
+			cumTau += self.parent.calcTau()
 		return cumTau
 
 class TransitorNode:
@@ -90,22 +100,45 @@ class TransitorNode:
 		self.children = children
 		self.ptau = None
 		self.cumCap = inputCapacitance
+
+	def addChild(self, child):
+		self.children.append(child)
 			
 	def calcpTau(self):
 		cumCap = self.outputCapacitance
 		for child in self.children:
 			if (child.cumCap == None):
-				child.calcptau()
+				child.calcpYau()
 			cumCap += child.cumCap
-		self.ptau = outputResistance*cumCap
+		self.ptau = self.outputResistance*cumCap
 
 	def calcTau(self):
 		if (self.ptau == None):
 			self.calcpTau()
 		cumTau = self.ptau
-		if (parent != None):
+		if (self.parent != None):
 			cumTau += parent.calcTau()
 		return cumTau
 
 	
-	
+# highlevelhelpers.py
+# defines the higher level classes of the elmore model
+class Wire(PiNode):
+	def __init__(self, fcapacitance, acapacitance, sheetresistance, length, width, parent, children):
+		"""
+		Creates and instance of a ''wire''
+
+		Args:
+			fcapacitance (float, double): wire capacitance in fF/um
+			acapacitance (float, double): wire capacitance in fF/um^2
+			sheetresistance (float, double): wire resistance in Ohms/[]
+			length (float, double): wire length in um
+			width (float, double): wire width in um
+			parent (Wire, PiNode, RCNode, TransitorNode): the parent of the node
+			children (list): the children of the node
+		"""
+		self.length = length
+		self.width = width
+		self.resistance = sheetresistance*(length/width)
+		self.capacitance = (fcapacitance*length+acapacitance*(length*width))
+		super().__init__(self.capacitance, self.resistance, parent, children)
