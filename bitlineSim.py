@@ -115,7 +115,7 @@ plt.show()
 
 bittest = []
 scale= []
-for i in range(1,200):
+for i in range(1,50):
 	bittest.append(Bitline(255, 1, .5, 10, .5, .16+(.01*i), .1, 0, 1))
 	scale.append((.16+.01*i))
 numbers = [x.worstCase()/1000000 for x in bittest]
