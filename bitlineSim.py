@@ -4,6 +4,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import inspect
 import elmore
+import sys
+sys.setrecursionlimit(1500)
 
 
 class Bitline:
@@ -87,7 +89,7 @@ bitlineWrite = Bitline(64, 2, .005, 1, 2, .1, .1, 0, 1)
 
 
 
-bitlineRead = Bitline(63, 2, .005, 1, 2, .1, .1, 0, 1)
+bitlineRead = Bitline(255, 2, .005, 1, 2, .1, .1, 0, 1)
 
 
 #print(bitlineRead.worstCase())
@@ -96,17 +98,56 @@ bitlineRead.derWorstCase()
 bittest = []
 scale= []
 for i in range(1,200):
-	bittest.append(Bitline(63, 2*(.01*i), .005/(.01*i), 1, .5, .1, .1, 0, 1))
+	bittest.append(Bitline(255, 1*(.01*i), .5/(.01*i), 10, .5, .1, .1, 0, 1))
 	scale.append((.01*i))
-numbers = [x.worstCase() for x in bittest]
+numbers = [x.worstCase()/1000000 for x in bittest]
 
 print(numbers)
 t = np.array(numbers)
 
 # red dashes, blue squares and green triangles
-plt.plot(t, scale, 'r--')
+plt.plot( scale, t, 'r--')
+plt.xlabel("Driver Scale")
+plt.ylabel("Delay (ns)")
+plt.title("Worst case delay as a funtion of driver scale")
+
 plt.show()
 
+bittest = []
+scale= []
+for i in range(1,200):
+	bittest.append(Bitline(255, 1, .5, 10, .5, .16+(.01*i), .1, 0, 1))
+	scale.append((.16+.01*i))
+numbers = [x.worstCase()/1000000 for x in bittest]
+
+print(numbers)
+t = np.array(numbers)
+
+# red dashes, blue squares and green triangles
+plt.plot( scale, t, 'r--')
+plt.xlabel("Wire thickness (um)")
+plt.ylabel("Delay (ns)")
+plt.title("Worst case delay as a funtion of wire thickness")
+
+plt.show()
+
+bittest = []
+scale= []
+for i in range(16,256):
+	bittest.append(Bitline(i, 1, .5, 10, .5, .16, .1, 0, 1))
+	scale.append((i))
+numbers = [x.worstCase()/1000000 for x in bittest]
+
+print(numbers)
+t = np.array(numbers)
+
+# red dashes, blue squares and green triangles
+plt.plot( scale, t, 'r--')
+plt.xlabel("Row count")
+plt.ylabel("Delay (ns)")
+plt.title("Worst case delay as a funtion of row size")
+
+plt.show()
 
 
 
