@@ -4,7 +4,7 @@
 class PiNode:
 	def __init__(self, capacitance, resistance, parent, children):
 		"""
-		Creates and instance of a ''PiNode''
+		Creates and instance of a PiNode, making a good approximation for a wire with the given capacitance and resistance values
 
 		Args:
 			capacitance (float, double): node capacitance in fF
@@ -58,6 +58,8 @@ class RCNode:
 			self.cumCap = capacitance	
 		else:
 			self.cumCap = None
+
+
 			
 	def addChild(self, child):
 		self.children.append(child)
@@ -77,6 +79,12 @@ class RCNode:
 		if (self.parent != None):
 			cumTau += self.parent.calcTau()
 		return cumTau
+
+	def dity(self):
+		self.cumTau = None
+		for child in self.children:
+			child.cumTau = None
+			child.dity()
 
 class TransitorNode:
 	"""
@@ -121,12 +129,11 @@ class TransitorNode:
 		return cumTau
 
 	
-# highlevelhelpers.py
-# defines the higher level classes of the elmore model
+
 class Wire(PiNode):
 	def __init__(self, fcapacitance, acapacitance, sheetresistance, length, width, parent, children):
 		"""
-		Creates and instance of a ''wire''
+		Creates and instance of a pinode, but takes physical dimensions instead of the electrical.
 
 		Args:
 			fcapacitance (float, double): wire capacitance in fF/um
